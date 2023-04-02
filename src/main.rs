@@ -11,9 +11,14 @@ fn un_hash_tokenize(
     let tokenprefix = "[".repeat(4);
     let tokensuffix = "]".repeat(4);
     let mut txt = text.clone();
-    for hash in hashes.values() {
+    for hash in hashes.keys() {
         let token = format!("{tokenprefix}{hash}{tokensuffix}");
-        let replace_str = format!("{start}{:?}{end}",hashes.iter().find(|(_, v)| **v == *hash).unwrap().0);
+        // let replace_str = format!("{start}{:?}{end}",hashes.iter().find(|(_, v)| **v == *hash).unwrap().0);
+        let replace_val = hashes.get(hash);
+        if replace_val.is_none() {
+            continue;
+        }
+        let replace_str = start.to_owned() + replace_val.unwrap() + end;
         txt = txt.replace(&token, &replace_str);
     }
     txt.to_string()
@@ -41,7 +46,7 @@ fn hash_tokenize(
             let replace_str = &text[start_idx + start.len()..=end_index-1];
             hasher.write(replace_str.as_bytes());
             let hash = format!("{:x}", hasher.finish());
-            hashes.insert(replace_str.to_string(), hash.clone());
+            hashes.insert(hash.clone(), replace_str.to_string());
             result.push_str(&text[start_index..start_idx]);
             result.push_str(&format!("{tokenprefix}{hash}{tokensuffix}"));
             start_index = end_index + end.len();
