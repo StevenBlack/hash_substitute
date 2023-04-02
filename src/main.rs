@@ -2,7 +2,28 @@ use std::collections::HashMap;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::Hasher;
 
-fn hash_tokenize(text: &mut String, start: &str, end: &str) -> (String, HashMap<String, String>) {
+fn un_hash_tokenize(
+    text: &mut String,
+    hashes: &HashMap<String, String>,
+    start: &str,
+    end: &str
+) -> String {
+    let tokenprefix = "[".repeat(4);
+    let tokensuffix = "]".repeat(4);
+    let mut txt = text.clone();
+    for hash in hashes.values() {
+        let token = format!("{tokenprefix}{hash}{tokensuffix}");
+        let replace_str = format!("{start}{:?}{end}",hashes.iter().find(|(_, v)| **v == *hash).unwrap().0);
+        txt = txt.replace(&token, &replace_str);
+    }
+    txt.to_string()
+}
+
+fn hash_tokenize(
+    text: &mut String,
+    start: &str,
+    end: &str
+) -> (String, HashMap<String, String>) {
     let tokenprefix = "[".repeat(4);
     let tokensuffix = "]".repeat(4);
     let mut hashes = HashMap::new();
@@ -33,13 +54,20 @@ fn hash_tokenize(text: &mut String, start: &str, end: &str) -> (String, HashMap<
 }
 
 fn main() {
-    let mut text = "This is <code>inline code</code> and also <code>this text</code> so they should <code>all</code> be tokenized.".to_string();
-    let (result, hashes) = hash_tokenize(&mut text, "<code>", "</code>");
+    let mut t = "This is <code>inline code</code> and so is <code>this text</code> as well.".to_string();
+    let (result, hashes) = hash_tokenize(&mut t, "<code>", "</code>");
     println!("{}", result);
     println!("{:?}", hashes);
+
     println!("=====");
-    let mut text = "This is *emphasized* and also *this text* so they should *all* be tokenized.".to_string();
-    let (result, hashes) = hash_tokenize(&mut text, "*", "*");
+    let mut t = "This is *emphasized* and so is *this* as well.".to_string();
+    let (result, hashes) = hash_tokenize(&mut t, "*", "*");
     println!("{}", result);
     println!("{:?}", hashes);
+
+    println!("=====");
+    let mut t = "This is *emphasized* and so is *this* as well.".to_string();
+    let mut foo = hash_tokenize(&mut t, "*", "*");
+    let result = un_hash_tokenize(&mut foo.0, &foo.1, "*", "*");
+    println!("{}", result);
 }
