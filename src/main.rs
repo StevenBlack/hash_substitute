@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::Hasher;
 
-fn un_hash_tokenize(
+fn untokenize(
     text: &mut String,
     hashes: &HashMap<String, String>,
     start: &str,
@@ -23,7 +23,7 @@ fn un_hash_tokenize(
     txt.to_string()
 }
 
-fn hash_tokenize(
+fn tokenize(
     text: &mut String,
     start: &str,
     end: &str
@@ -59,40 +59,40 @@ fn hash_tokenize(
 
 fn main() {
     let mut t = "This is *emphasized* and so is *this* as well.".to_string();
-    let mut foo = hash_tokenize(&mut t, "*", "*");
-    let result = un_hash_tokenize(&mut foo.0, &foo.1, "*", "*");
+    let mut foo = tokenize(&mut t, "*", "*");
+    let result = untokenize(&mut foo.0, &foo.1, "*", "*");
     println!("{}", result);
 }
 
 #[test]
 fn test_plain() {
     let mut t = "This is just plain text.".to_string();
-    let (result, hashes) = hash_tokenize(&mut t, "<code>", "</code>");
-    let r = un_hash_tokenize(&mut result.clone(), &hashes, "<code>", "</code>");
+    let (result, hashes) = tokenize(&mut t, "<code>", "</code>");
+    let r = untokenize(&mut result.clone(), &hashes, "<code>", "</code>");
     assert_eq!(r, t);
 }
 
 #[test]
 fn tes_thtml() {
     let mut t = "This is <code>inline code</code> and so is <code>this text</code> as well.".to_string();
-    let (result, hashes) = hash_tokenize(&mut t, "<code>", "</code>");
-    let r = un_hash_tokenize(&mut result.clone(), &hashes, "<code>", "</code>");
+    let (result, hashes) = tokenize(&mut t, "<code>", "</code>");
+    let r = untokenize(&mut result.clone(), &hashes, "<code>", "</code>");
     assert_eq!(r, t);
 }
 
 #[test]
 fn test_markdown_inline_code() {
     let mut t = "This is `inline code` and so is `this text` as well.".to_string();
-    let (result, hashes) = hash_tokenize(&mut t, "`", "`");
-    let r = un_hash_tokenize(&mut result.clone(), &hashes, "`", "`");
+    let (result, hashes) = tokenize(&mut t, "`", "`");
+    let r = untokenize(&mut result.clone(), &hashes, "`", "`");
     assert_eq!(r, t);
 }
 
 #[test]
 fn test_markdown_inline_em() {
     let mut t = "This is *emphasized* and so is *this* as well.".to_string();
-    let (result, hashes) = hash_tokenize(&mut t, "*", "*");
-    let r = un_hash_tokenize(&mut result.clone(), &hashes, "*", "*");
+    let (result, hashes) = tokenize(&mut t, "*", "*");
+    let r = untokenize(&mut result.clone(), &hashes, "*", "*");
     assert_eq!(r, t);
 }
 
@@ -107,7 +107,7 @@ fn main() {
 ```
 And this comes after the code block.
 "###.to_string();
-    let (result, hashes) = hash_tokenize(&mut t, "*", "*");
-    let r = un_hash_tokenize(&mut result.clone(), &hashes, "*", "*");
+    let (result, hashes) = tokenize(&mut t, "*", "*");
+    let r = untokenize(&mut result.clone(), &hashes, "*", "*");
     assert_eq!(r, t);
 }
